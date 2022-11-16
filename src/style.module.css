@@ -1,0 +1,35 @@
+.btnContainer {
+  display: flex;
+  justify-content: space-around;
+}
+
+.btn {
+  width: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+  cursor: pointer;
+}
+
+.btn.small {
+  height: auto;
+  line-height: initial;
+  padding-left: 5px;
+  padding-right: 5px;
+  font-size: 0.8rem;
+}
+
+.btn.small.mr {
+  margin-right: 5px;
+}
+
+.error {
+  color: red;
+}
+
+.warning {
+  color: orange;
+}
+
+.success {
+  color: green;
+}
