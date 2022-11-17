@@ -106,9 +106,17 @@ async function saveDefaults(e: Event) {
   toast('success', 'Current values saved as defaults.');
 }
 
-function restoreDefaults(e: Event) {
+async function restoreDefaults(e: Event) {
   e.preventDefault();
   console.info('Restoring default values...');
+  const slots = await GM.getValue('slots', undefined);
+  if (!slots) {
+    toast('error', 'Default values not found, save them first!');
+    return;
+  }
+  writeSlotIntoInputs(slots);
+  toast('success', 'Restored default values.');
+}
 
 async function exportData(e: Event) {
   e.preventDefault();
