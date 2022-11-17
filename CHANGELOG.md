@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/marcuson/WThermostatBeca-helpers/compare/1.1.0...1.1.1) (2022-11-17)
+
+
+### Bug Fixes
+
+* Add license. ([ac5e65c](https://github.com/marcuson/WThermostatBeca-helpers/commit/ac5e65c47e7a7ab7540c3a5c8f17260d3ddb561b))
+
 # [1.1.0](https://github.com/marcuson/WThermostatBeca-helpers/compare/1.0.0...1.1.0) (2022-11-17)
 
 
