@@ -4,10 +4,10 @@
 // @namespace   marcuson
 // @description Helpers for WThermostatBeca.
 // @match       *://*/thermostat_schedules
-// @version     1.1.2
+// @version     1.1.3
 // @author      marcuson
 // @license     GPL-3.0-or-later
-// @downloadURL https://marcuson.github.io/WThermostatBeca-helpers/index.user.js
+// @downloadURL https://github.com/marcuson/WThermostatBeca-helpers/raw/gh-pages/index.user.js
 // @supportURL  https://github.com/marcuson/WThermostatBeca-helpers/issues
 // @homepageURL https://github.com/marcuson/WThermostatBeca-helpers
 // @require     https://cdn.jsdelivr.net/combine/npm/@violentmonkey/dom@2,npm/@violentmonkey/ui@0.7
