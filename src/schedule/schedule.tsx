@@ -1,5 +1,8 @@
+import { Fragment } from '@violentmonkey/dom';
 import styles from '../style.module.css';
 import { toast } from '../toast/toast';
+import { downloadObjectAsJson } from '../utils/download-utils';
+import { askFileToRead } from '../utils/file-utils';
 import { strReplaceAt } from '../utils/str-utils';
 import {
   DAYOFF1_PREFIX,
@@ -9,14 +12,6 @@ import {
   WORKDAY_PREFIX,
 } from './const';
 import { DayPrefix, DaySlots, SlotsMap, SlotIdx } from './slot-data';
-
-let saveDefaultsBtn: Node;
-let copyWorkDayBtn: Node;
-let copyDayOff1Btn: Node;
-let copyDayOff2Btn: Node;
-let pasteWorkDayBtn: Node;
-let pasteDayOff1Btn: Node;
-let pasteDayOff2Btn: Node;
 
 let copiedData: SlotsMap = undefined;
 
@@ -42,7 +37,7 @@ function createSmallBtn(
     <button class={classes.join(' ')} onclick={fn}>
       {text}
     </button>
-  );
+  ) as HTMLButtonElement;
 }
 
 function addBtnsTableHeaders(copyBtn: Node, pasteBtn: Node, elem: Element) {
@@ -52,36 +47,49 @@ function addBtnsTableHeaders(copyBtn: Node, pasteBtn: Node, elem: Element) {
 }
 
 export function addButtons() {
-  saveDefaultsBtn = VM.m(
+  const saveAndRestoreDefaultsBtn = VM.m(
     <div class={styles.btnContainer}>
-      <button class={styles.btn} onclick={saveDefaults}>
-        Save current as defaults
-      </button>
-      <button class={styles.btn} onclick={restoreDefaults}>
-        Restore defaults
-      </button>
+      <span class={styles.btnGrouper}>
+        <button class={styles.btn} onclick={saveDefaults}>
+          Save current as defaults
+        </button>
+        <button class={styles.btn} onclick={restoreDefaults}>
+          Restore defaults
+        </button>
+      </span>
+      <hr class={styles.btnSpacer}></hr>
+      <span class={styles.btnGrouper}>
+        <button class={styles.btn} onclick={exportData}>
+          Export
+        </button>
+        <button class={styles.btn} onclick={importData}>
+          Import
+        </button>
+      </span>
     </div>
   );
-  document.querySelector('table.settingstable').before(saveDefaultsBtn);
+  document
+    .querySelector('table.settingstable')
+    .before(saveAndRestoreDefaultsBtn);
 
-  copyWorkDayBtn = createCopyBtn(copyDataFn(WORKDAY_PREFIX));
-  pasteWorkDayBtn = createPasteBtn(pasteDataFn(WORKDAY_PREFIX));
+  const copyWorkDayBtn = createCopyBtn(copyDataFn(WORKDAY_PREFIX));
+  const pasteWorkDayBtn = createPasteBtn(pasteDataFn(WORKDAY_PREFIX));
   addBtnsTableHeaders(
     copyWorkDayBtn,
     pasteWorkDayBtn,
     document.querySelector('table.settingstable thead th:nth-child(2)')
   );
 
-  copyDayOff1Btn = createCopyBtn(copyDataFn(DAYOFF1_PREFIX));
-  pasteDayOff1Btn = createPasteBtn(pasteDataFn(DAYOFF1_PREFIX));
+  const copyDayOff1Btn = createCopyBtn(copyDataFn(DAYOFF1_PREFIX));
+  const pasteDayOff1Btn = createPasteBtn(pasteDataFn(DAYOFF1_PREFIX));
   addBtnsTableHeaders(
     copyDayOff1Btn,
     pasteDayOff1Btn,
     document.querySelector('table.settingstable thead th:nth-child(3)')
   );
 
-  copyDayOff2Btn = createCopyBtn(copyDataFn(DAYOFF2_PREFIX));
-  pasteDayOff2Btn = createPasteBtn(pasteDataFn(DAYOFF2_PREFIX));
+  const copyDayOff2Btn = createCopyBtn(copyDataFn(DAYOFF2_PREFIX));
+  const pasteDayOff2Btn = createPasteBtn(pasteDataFn(DAYOFF2_PREFIX));
   addBtnsTableHeaders(
     copyDayOff2Btn,
     pasteDayOff2Btn,
@@ -101,6 +109,23 @@ async function saveDefaults(e: Event) {
 function restoreDefaults(e: Event) {
   e.preventDefault();
   console.info('Restoring default values...');
+
+async function exportData(e: Event) {
+  e.preventDefault();
+  console.info('Exporting current data...');
+  const slots = readInputIntoSlots();
+  console.debug('Slots read:', slots);
+  downloadObjectAsJson(slots, 'wthermostatbeca-schedules');
+  toast('success', 'Export completed.');
+}
+
+async function importData(e: Event) {
+  e.preventDefault();
+  console.info('Importing data...');
+  const slotsStr = await askFileToRead();
+  const slots = JSON.parse(slotsStr) as SlotsMap;
+  writeSlotIntoInputs(slots);
+  toast('success', 'Import completed.');
 }
 
 function copyDataFn(dayPrefix: DayPrefix) {
