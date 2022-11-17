@@ -8,7 +8,7 @@
 // @grant       GM.setValue
 // @version     process.env.VERSION
 // @author      process.env.AUTHOR
-// @license     GNU GPL V3
+// @license     GPL-3.0-or-later
 // @downloadURL https://marcuson.github.io/WThermostatBeca-helpers/index.user.js
 // @supportURL  https://github.com/marcuson/WThermostatBeca-helpers/issues
 // @homepageURL https://github.com/marcuson/WThermostatBeca-helpers
