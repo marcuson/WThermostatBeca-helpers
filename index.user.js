@@ -4,7 +4,7 @@
 // @namespace   marcuson
 // @description Helpers for WThermostatBeca.
 // @match       *://*/thermostat_schedules
-// @version     1.0.0
+// @version     1.1.0
 // @author      marcuson
 // @downloadURL https://marcuson.github.io/WThermostatBeca-helpers/index.user.js
 // @supportURL  https://github.com/marcuson/WThermostatBeca-helpers/issues
@@ -20,8 +20,8 @@
 
 var css_248z = "";
 
-var styles = {"btnContainer":"style-module_btnContainer__P6fk3","btn":"style-module_btn__Bc4TY","small":"style-module_small__KjQen","mr":"style-module_mr__yG-cJ","error":"style-module_error__ABgWN","warning":"style-module_warning__nASzn","success":"style-module_success__ZG5Xf"};
-var stylesheet=".style-module_btnContainer__P6fk3{display:flex;justify-content:space-around}.style-module_btn__Bc4TY{cursor:pointer;padding-left:20px;padding-right:20px;width:auto}.style-module_btn__Bc4TY.style-module_small__KjQen{font-size:.8rem;height:auto;line-height:normal;padding-left:5px;padding-right:5px}.style-module_btn__Bc4TY.style-module_small__KjQen.style-module_mr__yG-cJ{margin-right:5px}.style-module_error__ABgWN{color:red}.style-module_warning__nASzn{color:orange}.style-module_success__ZG5Xf{color:green}";
+var styles = {"btnContainer":"style-module_btnContainer__P6fk3","btnGrouper":"style-module_btnGrouper__6lr6j","btnSpacer":"style-module_btnSpacer__s-37w","btn":"style-module_btn__Bc4TY","small":"style-module_small__KjQen","mr":"style-module_mr__yG-cJ","error":"style-module_error__ABgWN","warning":"style-module_warning__nASzn","success":"style-module_success__ZG5Xf"};
+var stylesheet=".style-module_btnContainer__P6fk3{display:flex;justify-content:space-around}.style-module_btnGrouper__6lr6j{display:flex;flex-grow:1;justify-content:space-between}.style-module_btnSpacer__s-37w{margin:0 20px}.style-module_btn__Bc4TY{cursor:pointer;padding-left:20px;padding-right:20px;width:auto}.style-module_btn__Bc4TY.style-module_small__KjQen{font-size:.8rem;height:auto;line-height:normal;padding-left:5px;padding-right:5px}.style-module_btn__Bc4TY.style-module_small__KjQen.style-module_mr__yG-cJ{margin-right:5px}.style-module_error__ABgWN{color:red}.style-module_warning__nASzn{color:orange}.style-module_success__ZG5Xf{color:green}";
 
 function _extends() {
   _extends = Object.assign ? Object.assign.bind() : function (target) {
@@ -48,6 +48,41 @@ function toast(type, msg, options) {
   }));
 }
 
+function downloadObjectAsJson(exportObj, exportName) {
+  const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(exportObj));
+  const downloadAnchorNode = document.createElement('a');
+  downloadAnchorNode.setAttribute('href', dataStr);
+  downloadAnchorNode.setAttribute('download', exportName + '.json');
+  document.body.appendChild(downloadAnchorNode); // required for firefox
+  downloadAnchorNode.click();
+  downloadAnchorNode.remove();
+}
+
+async function askFileToRead() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  const prom = new Promise((res, rej) => {
+    input.onchange = () => {
+      const file = input.files[0];
+      const reader = new FileReader();
+      reader.readAsText(file, 'UTF-8');
+      reader.onload = readerEvent => {
+        const content = readerEvent.target.result;
+        res(content);
+      };
+      reader.onerror = err => {
+        rej(err);
+      };
+    };
+  });
+  input.setAttribute('style', 'display:none;');
+  document.body.appendChild(input); // required for firefox
+  input.click();
+  const res = await prom;
+  input.remove();
+  return res;
+}
+
 function strReplaceAt(str, index, replacement) {
   return str.substring(0, index) + replacement + str.substring(index + replacement.length);
 }
@@ -58,13 +93,6 @@ const DAYOFF2_PREFIX = 'u';
 const TIME_SUFFIX = 'h';
 const TEMP_SUFFIX = 't';
 
-let saveDefaultsBtn;
-let copyWorkDayBtn;
-let copyDayOff1Btn;
-let copyDayOff2Btn;
-let pasteWorkDayBtn;
-let pasteDayOff1Btn;
-let pasteDayOff2Btn;
 let copiedData = undefined;
 function createCopyBtn(fn) {
   return createSmallBtn('Copy', true, fn);
@@ -88,24 +116,36 @@ function addBtnsTableHeaders(copyBtn, pasteBtn, elem) {
   elem.appendChild(pasteBtn);
 }
 function addButtons() {
-  saveDefaultsBtn = VM.m(VM.h("div", {
+  const saveAndRestoreDefaultsBtn = VM.m(VM.h("div", {
     class: styles.btnContainer
+  }, VM.h("span", {
+    class: styles.btnGrouper
   }, VM.h("button", {
     class: styles.btn,
     onclick: saveDefaults
   }, "Save current as defaults"), VM.h("button", {
     class: styles.btn,
     onclick: restoreDefaults
-  }, "Restore defaults")));
-  document.querySelector('table.settingstable').before(saveDefaultsBtn);
-  copyWorkDayBtn = createCopyBtn(copyDataFn(WORKDAY_PREFIX));
-  pasteWorkDayBtn = createPasteBtn(pasteDataFn(WORKDAY_PREFIX));
+  }, "Restore defaults")), VM.h("hr", {
+    class: styles.btnSpacer
+  }), VM.h("span", {
+    class: styles.btnGrouper
+  }, VM.h("button", {
+    class: styles.btn,
+    onclick: exportData
+  }, "Export"), VM.h("button", {
+    class: styles.btn,
+    onclick: importData
+  }, "Import"))));
+  document.querySelector('table.settingstable').before(saveAndRestoreDefaultsBtn);
+  const copyWorkDayBtn = createCopyBtn(copyDataFn(WORKDAY_PREFIX));
+  const pasteWorkDayBtn = createPasteBtn(pasteDataFn(WORKDAY_PREFIX));
   addBtnsTableHeaders(copyWorkDayBtn, pasteWorkDayBtn, document.querySelector('table.settingstable thead th:nth-child(2)'));
-  copyDayOff1Btn = createCopyBtn(copyDataFn(DAYOFF1_PREFIX));
-  pasteDayOff1Btn = createPasteBtn(pasteDataFn(DAYOFF1_PREFIX));
+  const copyDayOff1Btn = createCopyBtn(copyDataFn(DAYOFF1_PREFIX));
+  const pasteDayOff1Btn = createPasteBtn(pasteDataFn(DAYOFF1_PREFIX));
   addBtnsTableHeaders(copyDayOff1Btn, pasteDayOff1Btn, document.querySelector('table.settingstable thead th:nth-child(3)'));
-  copyDayOff2Btn = createCopyBtn(copyDataFn(DAYOFF2_PREFIX));
-  pasteDayOff2Btn = createPasteBtn(pasteDataFn(DAYOFF2_PREFIX));
+  const copyDayOff2Btn = createCopyBtn(copyDataFn(DAYOFF2_PREFIX));
+  const pasteDayOff2Btn = createPasteBtn(pasteDataFn(DAYOFF2_PREFIX));
   addBtnsTableHeaders(copyDayOff2Btn, pasteDayOff2Btn, document.querySelector('table.settingstable thead th:nth-child(4)'));
 }
 async function saveDefaults(e) {
@@ -116,9 +156,32 @@ async function saveDefaults(e) {
   await GM.setValue('slots', slots);
   toast('success', 'Current values saved as defaults.');
 }
-function restoreDefaults(e) {
+async function restoreDefaults(e) {
   e.preventDefault();
   console.info('Restoring default values...');
+  const slots = await GM.getValue('slots', undefined);
+  if (!slots) {
+    toast('error', 'Default values not found, save them first!');
+    return;
+  }
+  writeSlotIntoInputs(slots);
+  toast('success', 'Restored default values.');
+}
+async function exportData(e) {
+  e.preventDefault();
+  console.info('Exporting current data...');
+  const slots = readInputIntoSlots();
+  console.debug('Slots read:', slots);
+  downloadObjectAsJson(slots, 'wthermostatbeca-schedules');
+  toast('success', 'Export completed.');
+}
+async function importData(e) {
+  e.preventDefault();
+  console.info('Importing data...');
+  const slotsStr = await askFileToRead();
+  const slots = JSON.parse(slotsStr);
+  writeSlotIntoInputs(slots);
+  toast('success', 'Import completed.');
 }
 function copyDataFn(dayPrefix) {
   return e => {
