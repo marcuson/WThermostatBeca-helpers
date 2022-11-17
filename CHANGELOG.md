@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/marcuson/WThermostatBeca-helpers/compare/1.1.2...1.1.3) (2022-11-17)
+
+
+### Bug Fixes
+
+* Use downloadURL which is updated faster by CI process. ([9dcf427](https://github.com/marcuson/WThermostatBeca-helpers/commit/9dcf4277418f99d6dc297ca9c4a64c0d24617bf6))
+
 ## [1.1.2](https://github.com/marcuson/WThermostatBeca-helpers/compare/1.1.1...1.1.2) (2022-11-17)
 
 
