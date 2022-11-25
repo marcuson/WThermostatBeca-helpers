@@ -102,14 +102,14 @@ async function saveDefaults(e: Event) {
   console.info('Saving current data as default values...');
   const slots = readInputIntoSlots();
   console.debug('Slots read:', slots);
-  await GM.setValue('slots', slots);
+  await GM.setValue(getDefaultsValueKey(), slots);
   toast('success', 'Current values saved as defaults.');
 }
 
 async function restoreDefaults(e: Event) {
   e.preventDefault();
   console.info('Restoring default values...');
-  const slots = await GM.getValue('slots', undefined);
+  const slots = await GM.getValue(getDefaultsValueKey(), undefined);
   if (!slots) {
     toast('error', 'Default values not found, save them first!');
     return;
@@ -224,4 +224,8 @@ function readInputIntoSlots(dayPrefixFilter?: DayPrefix): SlotsMap {
   }, {} as SlotsMap);
 
   return slots;
+}
+
+function getDefaultsValueKey(): string {
+  return document.location.origin + document.location.pathname + '/slots';
 }
