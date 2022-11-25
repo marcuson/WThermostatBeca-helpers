@@ -1,3 +1,10 @@
+## [1.1.4](https://github.com/marcuson/WThermostatBeca-helpers/compare/1.1.3...1.1.4) (2022-11-25)
+
+
+### Bug Fixes
+
+* Allow to save defaults for more than one thermostat. ([2b9c3d2](https://github.com/marcuson/WThermostatBeca-helpers/commit/2b9c3d2eb5e6d7d45e7ea7092ea93de131549902))
+
 ## [1.1.3](https://github.com/marcuson/WThermostatBeca-helpers/compare/1.1.2...1.1.3) (2022-11-17)
 
 
